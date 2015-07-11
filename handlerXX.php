@@ -7,7 +7,7 @@
 
 require_once CMS_FOLDER . 'hostcmsfiles/lib/beGateway/lib/beGateway.php';
 
-class Shop_Payment_System_Handler27 extends Shop_Payment_System_Handler
+class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
 {
 	/* Идентификатор магазина */
 	private $_shop_id = '361';
