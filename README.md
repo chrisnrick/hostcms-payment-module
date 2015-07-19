@@ -3,7 +3,7 @@
 ## Установка модуля
 
   * Создайте резервную копию вашего магазина и базы данных
-  * Загрузите [архив](https://github.com/beGateway/hostcms-payment-module/archive/master.zip) и переместите папку `hostcmsfiles` в корень вашего сайта
+  * Загрузите [архив](ihttps://raw.githubusercontent.com/beGateway/hostcms-payment-module/master/hostcms-payment-module.zip) и переместите папку `hostcmsfiles` в корень вашего сайта
 
 ## Настройка модуля
 
