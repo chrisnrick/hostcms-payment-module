@@ -165,7 +165,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
     $cancelUrl = $handlerUrl;
 
     /* в режиме разработки переопределить домен для доставки нотификации о платеже */
-    $handlerUrl = str_replace('hostcms.local', 'hostcms.webhook.begateway.com:8443', $handlerUrl);
+    $handlerUrl = str_replace('hostcms61.local', 'hostcms61.webhook.begateway.com:8443', $handlerUrl);
 
 		$oShop_Currency = Core_Entity::factory('Shop_Currency')->find($this->_begateway_currency_id);
 
