@@ -2,29 +2,6 @@
 
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
-// Проверять остаток на складе при добавлении в корзину
-$bCheckStock = TRUE;
-
-// ------------------------------------------------
-// Обработка формы "Оплата через систему QIWI Кошелек"
-// ------------------------------------------------
-if (isset($_REQUEST['command']) && $_REQUEST['command'] == 'bill')
-{
-	// Получаем ID заказа
-	$order_id = intval(Core_Array::getRequest('bill_id'));
-
-	$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-
-	if (!is_null($oShop_Order->id))
-	{
-		// Вызов обработчика платежной системы
-		Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-			->shopOrder($oShop_Order)
-			->paymentProcessing();
-		return TRUE;
-	}
-}
-
 // ------------------------------------------------
 // Обработка запросов от Яндекс.Денег
 // ------------------------------------------------
@@ -61,7 +38,6 @@ if (isset($_REQUEST['type']))
 		Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
 			->shopOrder($oShop_Order)
 			->paymentProcessing();
-		die();
 	}
 }
 
@@ -153,15 +129,13 @@ if (isset($_REQUEST['webhook']) && $_REQUEST['webhook'] == 'begateway')
 {
   // Получаем ID заказа
   $order_id = intval(Core_Array::getRequest('order_id'));
-
   $oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-
   if (!is_null($oShop_Order->id))
   {
     // Вызов обработчика платежной системы
     Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-      ->shopOrder($oShop_Order)
-      ->paymentProcessing();
+    ->shopOrder($oShop_Order)
+    ->paymentProcessing();
   }
   exit();
 }
@@ -175,7 +149,6 @@ if (Core_Array::getRequest('add'))
 	{
 		$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 		$oShop_Cart_Controller
-			->checkStock($bCheckStock)
 			->shop_item_id($shop_item_id)
 			->quantity(Core_Array::getRequest('count', 1))
 			->add();
@@ -220,10 +193,8 @@ if (Core_Array::getGet('action') == 'repeat')
 			foreach ($aShop_Order_Items as $oShop_Order_Item)
 			{
 				$oShop_Order_Item->shop_item_id && $oShop_Cart_Controller
-					->checkStock($bCheckStock)
 					->shop_item_id($oShop_Order_Item->shop_item_id)
 					->quantity($oShop_Order_Item->quantity)
-					->marking($oShop_Order_Item->marking)
 					->add();
 			}
 		}
@@ -283,38 +254,23 @@ if (Core_Array::getGet('delete'))
 	}
 }
 
-// Запоминаем купон
-if (!is_null(Core_Array::getRequest('coupon_text')))
-{
-	$_SESSION['hostcmsOrder']['coupon_text'] = trim(strval(Core_Array::getRequest('coupon_text')));
-}
-
 if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 {
 	$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 	$aCart = $oShop_Cart_Controller->getAll($oShop);
 
-	// Склад по умолчанию
-	$oShop_Warehouse = $oShop->Shop_Warehouses->getDefault();
-	
 	foreach ($aCart as $oShop_Cart)
 	{
-		$quantity = Core_Array::getPost('quantity_' . $oShop_Cart->shop_item_id);
-		
-		// Количество было передано
-		if (!is_null($quantity))
-		{
-			$oShop_Cart_Controller
-				->checkStock($bCheckStock)
-				->shop_item_id($oShop_Cart->shop_item_id)
-				->quantity($quantity)
-				->postpone(is_null(Core_Array::getPost('postpone_' . $oShop_Cart->shop_item_id)) ? 0 : 1)
-				->shop_warehouse_id(
-					Core_Array::getPost('warehouse_' . $oShop_Cart->shop_item_id, !is_null($oShop_Warehouse) ? $oShop_Warehouse->id : 0)
-				)
-				->update();
-		}
+		$oShop_Cart_Controller
+			->shop_item_id($oShop_Cart->shop_item_id)
+			->quantity(Core_Array::getPost('quantity_' . $oShop_Cart->shop_item_id))
+			->postpone(is_null(Core_Array::getPost('postpone_' . $oShop_Cart->shop_item_id)) ? 0 : 1)
+			->shop_warehouse_id(Core_Array::getPost('warehouse_' . $oShop_Cart->shop_item_id, 0))
+			->update();
 	}
+
+	// Запоминаем купон
+	$_SESSION['hostcmsOrder']['coupon_text'] = trim(strval(Core_Array::getPost('coupon_text')));
 }
 
 $Shop_Cart_Controller_Show = new Shop_Cart_Controller_Show($oShop);
