@@ -1,4 +1,4 @@
-# Модуль оплаты для HostCMS
+# Модуль оплаты для HostCMS 6.2
 
 Модуль для версии 6.1 находится
 [здесь](https://github.com/beGateway/hostcms-payment-module/tree/6.1)
