@@ -1,9 +1,12 @@
-# Модуль оплаты для HostCMS
+# Модуль оплаты для HostCMS 6.1
+
+Модуль для версии 6.2 находится
+[здесь](https://github.com/beGateway/hostcms-payment-module)
 
 ## Установка модуля
 
   * Создайте резервную копию вашего магазина и базы данных
-  * Загрузите [архив](ihttps://raw.githubusercontent.com/beGateway/hostcms-payment-module/master/hostcms-payment-module.zip) и переместите папку `hostcmsfiles` в корень вашего сайта
+  * Загрузите [архив](https://github.com/beGateway/hostcms-payment-module/raw/6.1/hostcms-payment-module.zip) и переместите папку `hostcmsfiles` в корень вашего сайта
 
 ## Настройка модуля
 
