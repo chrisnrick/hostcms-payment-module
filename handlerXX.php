@@ -38,10 +38,10 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
   public function __construct(Shop_Payment_System_Model $oShop_Payment_System_Model)
   {
     $this->_setupLogger();
-    \beGateway\Settings::$shopId = $this->_shop_id;
-    \beGateway\Settings::$shopKey = $this->_shop_key;
-    \beGateway\Settings::$gatewayBase = 'https://' . $this->_gateway_base;
-    \beGateway\Settings::$checkoutBase = 'https://' . $this->_checkout_base;
+    beGateway_Settings::$shopId = $this->_shop_id;
+    beGateway_Settings::$shopKey = $this->_shop_key;
+    beGateway_Settings::$gatewayBase = 'https://' . $this->_gateway_base;
+    beGateway_Settings::$checkoutBase = 'https://' . $this->_checkout_base;
     parent::__construct($oShop_Payment_System_Model);
   }
 
@@ -92,7 +92,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
 	function ProcessResult()
 	{
 
-    $webhook = new \beGateway\Webhook;
+    $webhook = new beGateway_Webhook;
 
     if (!$webhook->isAuthorized() ||
         !$webhook->isSuccess() ||
@@ -110,7 +110,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
     $currency = $oShop_Currency->code;
     $currency = ($currency == 'RUR') ? 'RUB' : $currency;
 
-    $money = new \beGateway\Money;
+    $money = new beGateway_Money;
     $money->setCurrency($currency);
     $money->setAmount($sum);
 
@@ -175,7 +175,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
 
       $this->_setupLogger();
 
-      $transaction = new \beGateway\GetPaymentPageToken;
+      $transaction = new beGateway_GetPaymentPageToken;
 
       /* конвертировать RUR код в RUB */
       $currency = $oShop_Currency->code;
@@ -236,7 +236,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
   private function _setupLogger()
   {
     if ($this->_debug) {
-      \beGateway\Logger::getInstance()->setLogLevel(\beGateway\Logger::DEBUG);
+      beGateway_Logger::getInstance()->setLogLevel(beGateway_Logger::DEBUG);
     }
   }
 }
