@@ -1,3 +1,4 @@
 [submodule "hostcmsfiles/lib/beGateway"]
 	path = hostcmsfiles/lib/beGateway
 	url = https://github.com/beGateway/begateway-api-php.git
+  branch = php5.2
