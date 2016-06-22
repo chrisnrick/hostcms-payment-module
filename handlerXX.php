@@ -2,7 +2,7 @@
 
 /**
  * beGateway
- * Версия 1.0.0
+ * Версия 2.0.0
  */
 
 require_once CMS_FOLDER . 'hostcmsfiles/lib/beGateway/lib/beGateway.php';
@@ -14,6 +14,17 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
 
   /* Секретный ключ магазина */
   private $_shop_key = 'b8647b68898b084b836474ed8d61ffe117c9a01168d867f24953b776ddcb134d';
+
+  /* Доступные способы оплаты */
+  private $_payment_methods = array('credit_card', 'erip');
+
+  /* Настройки способов оплаты */
+  private $_payment_methods_settings = array(
+    'erip' => array(
+      'service_no' => 99999999,
+      'service_info' => 'Оплата заказа %s'
+    )
+  );
 
   /* Домен платежного шлюза, полученный от платежной системы */
   private $_gateway_base = 'demo-gateway.begateway.com';
@@ -128,6 +139,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
         "Сумма платежа: " . $sum,
         "Валюта платежа: " . $oShop_Currency->code,
         "UID платежа: " . $webhook->getUid(),
+        "Способ оплаты: " . $webhook->getPaymentMethod(),
         "Статус платежа: успешно"
       );
 
@@ -175,7 +187,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
 
       $this->_setupLogger();
 
-      $transaction = new \beGateway\GetPaymentPageToken;
+      $transaction = new \beGateway\GetPaymentToken;
 
       /* конвертировать RUR код в RUB */
       $currency = $oShop_Currency->code;
@@ -192,6 +204,22 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
       $transaction->setFailUrl($cancelUrl);
       $transaction->setCancelUrl($shopUrl);
 
+      foreach ($this->_payment_methods as $pm) {
+        $klass = $this->_camelize($pm);
+        $settings = NULL;
+        if (isset($this->_payment_methods_settings[$pm])) {
+          $settings = $this->_payment_methods_settings[$pm];
+        }
+
+        if ($pm == 'erip') {
+          $settings['account_number'] = (string)$this->_shopOrder->id;
+          $settings['order_id'] = (int)$this->_shopOrder->id;
+          $settings['service_info'][0] = sprintf($settings['service_info'][0], $this->_shopOrder->id);
+        }
+        $klass = "\beGateway\PaymentMethod\\" . $klass;
+        $transaction->addPaymentMethod(new $klass($settings));
+      }
+
       if ($this->_shopOrder->email) $transaction->customer->setEmail($this->_shopOrder->email);
       if ($this->_hideAddress) $transaction->setAddressHidden();
 
@@ -200,7 +228,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
       if ($response->isSuccess()) {
 
         ?>
-        <h1>Оплата банковской картой</h1>
+        <h1>Оплата заказа</h1>
         <p>Сумма к оплате составляет <strong><?php echo $sum?> <?php echo $oShop_Currency->name?></strong></p>
 
         <p>Для оплаты нажмите кнопку "Оплатить".</p>
@@ -209,7 +237,7 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
           Внимание! Нажимая &laquo;Оплатить&raquo; Вы подтверждаете передачу контактных данных на сервер платежной системы для оплаты.
         </p>
 
-        <form action="https://<?php echo $this->_checkout_base . '/checkout'; ?>" name="pay" method="post">
+        <form action="<?php echo $response->getRedirectUrlScriptName(); ?>" name="pay" method="post">
           <input type="hidden" name="token" value="<?php echo $response->getToken(); ?>">
           <input type="submit" name="button" value="Оплатить">
         </form>
@@ -238,5 +266,12 @@ class Shop_Payment_System_HandlerXX extends Shop_Payment_System_Handler
     if ($this->_debug) {
       \beGateway\Logger::getInstance()->setLogLevel(\beGateway\Logger::DEBUG);
     }
+  }
+
+  private function _camelize($name) {
+    $klass = str_replace('_', ' ', $name);
+    $klass = ucwords($klass);
+    $klass = str_replace(' ', '', $klass);
+    return $klass;
   }
 }
